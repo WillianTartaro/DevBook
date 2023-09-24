@@ -5,7 +5,6 @@ import (
 	"DevBook/api/src/modelos"
 	"DevBook/api/src/repositorios"
 	"DevBook/api/src/respostas"
-	"database/sql"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"io"
@@ -33,7 +32,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := conexaoBanco(w)
+	db := banco.ConexaoBanco(w)
 
 	repositorio := repositorios.NovoRepositorioUsuarios(db)
 	usuario.ID, erro = repositorio.CriarUsuario(usuario)
@@ -49,7 +48,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 func BuscarUsuarios(w http.ResponseWriter, r *http.Request) {
 	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
 
-	db := conexaoBanco(w)
+	db := banco.ConexaoBanco(w)
 
 	repositorios := repositorios.NovoRepositorioUsuarios(db)
 	usuarios, erro := repositorios.Buscar(nomeOuNick)
@@ -71,7 +70,7 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := conexaoBanco(w)
+	db := banco.ConexaoBanco(w)
 
 	repositorios := repositorios.NovoRepositorioUsuarios(db)
 	usuario, erro := repositorios.BuscarPorID(usuarioID)
@@ -110,7 +109,7 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := conexaoBanco(w)
+	db := banco.ConexaoBanco(w)
 
 	repositorio := repositorios.NovoRepositorioUsuarios(db)
 	if erro = repositorio.Atualizar(usuarioID, usuario); erro != nil {
@@ -129,7 +128,7 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
-	db := conexaoBanco(w)
+	db := banco.ConexaoBanco(w)
 
 	repositorio := repositorios.NovoRepositorioUsuarios(db)
 	if erro = repositorio.Deletar(usuarioID); erro != nil {
@@ -138,15 +137,4 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respostas.JSON(w, http.StatusNoContent, nil)
-}
-
-func conexaoBanco(w http.ResponseWriter) *sql.DB {
-	db, erro := banco.Conectar()
-	if erro != nil {
-		respostas.Erro(w, http.StatusInternalServerError, erro)
-		return nil
-	}
-	defer db.Close()
-
-	return db
 }
