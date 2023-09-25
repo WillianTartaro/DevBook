@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"DevBook/api/src/autenticacao"
 	"DevBook/api/src/banco"
 	"DevBook/api/src/modelos"
 	"DevBook/api/src/repositorios"
 	"DevBook/api/src/respostas"
 	"DevBook/api/src/seguranca"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -39,6 +41,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Você está logado!"))
+	token, _ := autenticacao.CriarToken(usuarioSalvo.ID)
+	fmt.Println(token)
+	w.Write([]byte(token))
 
 }
