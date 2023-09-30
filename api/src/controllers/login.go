@@ -8,7 +8,6 @@ import (
 	"DevBook/api/src/respostas"
 	"DevBook/api/src/seguranca"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 )
@@ -41,8 +40,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := autenticacao.CriarToken(usuarioSalvo.ID)
-	fmt.Println(token)
+	token, erro := autenticacao.CriarToken(usuarioSalvo.ID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro)
+		return
+	}
 	w.Write([]byte(token))
 
 }
