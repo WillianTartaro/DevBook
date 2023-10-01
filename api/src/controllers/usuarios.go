@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"DevBook/api/src/autenticacao"
 	"DevBook/api/src/banco"
 	"DevBook/api/src/modelos"
 	"DevBook/api/src/repositorios"
 	"DevBook/api/src/respostas"
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"io"
 	http "net/http"
@@ -92,6 +94,17 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	usuarioIDToken, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if usuarioID != usuarioIDToken {
+		respostas.Erro(w, http.StatusForbidden, errors.New("não é possivel atualizar um usuario que não é o seu"))
+		return
+	}
+
 	corpoRequisicao, erro := io.ReadAll(r.Body)
 	if erro != nil {
 		respostas.Erro(w, http.StatusUnprocessableEntity, erro)
@@ -128,6 +141,18 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 		respostas.Erro(w, http.StatusBadRequest, erro)
 		return
 	}
+
+	usuarioIDToken, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if usuarioID != usuarioIDToken {
+		respostas.Erro(w, http.StatusForbidden, errors.New("não é possivel deletar um usuario que não é o seu"))
+		return
+	}
+
 	db := banco.ConexaoBanco(w)
 
 	repositorio := repositorios.NovoRepositorioUsuarios(db)
